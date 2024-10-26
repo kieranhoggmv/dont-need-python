@@ -50,7 +50,7 @@ def add_password(file_path: str, password: str, file_suffix="-pp"):
 
 
 def folder_to_dataframes(
-    folder_path: str = None, file_types: list = ["csv", "xlsx"], password_map: dict = {}
+    folder_path: str = None, file_types: list = ["csv", "xlsx"], password_map: dict = {}, rename_func=None
 ) -> list[pd.DataFrame]:
     """Opens a folder of file and converts them into pandas DataFrames
 
@@ -58,6 +58,7 @@ def folder_to_dataframes(
         folder_path (str): The location of a directory to look for the files in
         file_types (list): A list of file extensions to open from the folder
         password_map (dict): A dictionary mapping of filename to passwords to use
+        rename_func (func): A function to rename the file based on its dataframe
 
     Returns:
         df_list: A list of pandas DataFrames
@@ -69,13 +70,14 @@ def folder_to_dataframes(
         path = os.getcwd()
 
     for file in os.listdir(path):
+        df = None
         file_path = os.path.join(path, file)
         if file.endswith(tuple(file_types)):
             if file.endswith("csv"):
-                df_list.append(pd.read_csv(file_path))
+                df = pd.read_csv(file_path)
             elif file.endswith("xlsx"):
                 try:
-                    df_list.append(pd.read_excel(file_path))
+                    df = pd.read_excel(file_path)
                 except XLRDError:
                     # File has a password on it, try the password map, ask if not present
                     if password_map and file in password_map.keys():
@@ -88,4 +90,6 @@ def folder_to_dataframes(
                 raise NotImplementedError(
                     f"File type {file.split(".")[-1]} not supported yet"
                 )
+        if df and rename_func:
+            df.to_excel(rename_func(df))
     return df_list

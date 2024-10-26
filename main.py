@@ -3,8 +3,11 @@ import pandas as pd
 
 from utils import folder_to_dataframes
 
+
 passwords = json.loads(open("passwords.txt").read())
-dataframes = folder_to_dataframes("data", password_map=passwords)
+dataframes = folder_to_dataframes(
+    "data", password_map=passwords, rename_func=lambda x: str(x.iloc[0]["Student ID"])
+)
 all_cols = []
 
 renames = {
