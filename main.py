@@ -18,16 +18,6 @@ dataframes = folder_to_dataframes("data", password_map=passwords, rename_func=re
 ### Combine our separate dataframes ###
 #######################################
 """
-combined_df = pd.DataFrame()
-for df in dataframes:
-    combined_df = pd.concat([combined_df, df], ignore_index=True)
-
-
-"""
-###############################
-### Standardise our columns ###
-###############################
-"""
 renames = {
     "test date": "Test Date",
     "test name": "Test Name",
@@ -41,5 +31,9 @@ renames = {
     "nationality": "Nationality",
     "name": "Name",
 }
-combined_df = combined_df.rename(columns=renames)
+combined_df = pd.DataFrame()
+for df in dataframes:
+    df = df.rename(columns=renames)
+    combined_df = pd.concat([combined_df, df], ignore_index=True)
+
 combined_df.to_csv("combined.csv")
