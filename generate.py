@@ -41,13 +41,9 @@ passwords = {}
 for i in range(50):
     ### New file
 
-    lowercase_headers = bool(random.randint(0, 2))
+    lowercase_headers = bool(random.randint(0, 1))
     mangle_id = bool(random.randint(0, 2))
     date_version = random.randint(1, 2)
-
-    for j in range(1, len(headers) - 1):
-        if lowercase_headers:
-            headers[j] = headers[j].lower()
 
     # Pick a random extra column
     extra_header = random.choice(list(extra_headers.items()))
@@ -81,7 +77,7 @@ for i in range(50):
         if random.randint(1, 100) == 100:
             score = None
         if mangle_id:
-            student_id = "0" + str(student_id)[:11]
+            student_id = str(student_id)[:11]
         if extra_header[1] == "name":
             data = str(" " * random.randrange(0, 3)) + fake.unique.name()
         elif extra_header[1] == "date_of_birth":
@@ -102,6 +98,8 @@ for i in range(50):
             ]
         )
     df = pd.DataFrame(columns=headers, data=rows)
+    if lowercase_headers:
+        df.columns = df.columns.str.lower()
 
     random_file = random.randint(1, 2)
     filename = "".join(
@@ -117,7 +115,9 @@ for i in range(50):
         if random.randint(1, 5) == 5:
             new_filename = add_password(file_path, filename)
             passwords[new_filename] = filename
+
     headers.remove(extra_header[0])
 
-with open("passwords.txt", "w") as p:
+
+with open(os.path.join(DATA_FOLDER, "passwords.txt"), "w") as p:
     p.writelines(json.dumps(passwords))

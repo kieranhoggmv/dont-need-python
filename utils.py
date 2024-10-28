@@ -50,7 +50,11 @@ def add_password(file_path: str, password: str, file_suffix="-pp"):
 
 
 def folder_to_dataframes(
-    folder_path: str = None, file_types: list = ["csv", "xlsx"], password_map: dict = {}, rename_func=None
+    folder_path: str = None,
+    file_types: list = ["csv", "xlsx"],
+    password_map: dict = {},
+    rename_func=None,
+    rename_folder="clean",
 ) -> list[pd.DataFrame]:
     """Opens a folder of file and converts them into pandas DataFrames
 
@@ -69,6 +73,11 @@ def folder_to_dataframes(
     else:
         path = os.getcwd()
 
+    if rename_func:
+        rename_path = os.path.join(path, rename_folder)
+        if not os.path.isdir(rename_path):
+            os.makedirs(rename_path)
+
     for file in os.listdir(path):
         df = None
         file_path = os.path.join(path, file)
@@ -85,11 +94,17 @@ def folder_to_dataframes(
                         print(f"Using password provided for {file}")
                     else:
                         password = input(f'Enter password for "{file_path}": ')
-                    df_list.append(pd.read_excel(remove_password(file_path, password)))
+                    df = pd.read_excel(remove_password(file_path, password))
             else:
                 raise NotImplementedError(
                     f"File type {file.split(".")[-1]} not supported yet"
                 )
-        if df and rename_func:
-            df.to_excel(rename_func(df))
+        if df is not None and rename_func:
+            df.columns = [c.lower() for c in df.columns]
+            new_filename = rename_func(df)
+            new_path = os.path.join(folder_path, rename_folder, new_filename)
+            df.to_excel(new_path)
+            df = pd.read_excel(new_path)
+        if df is not None:
+            df_list.append(df)
     return df_list

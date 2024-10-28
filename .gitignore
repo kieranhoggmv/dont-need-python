@@ -5,3 +5,4 @@ __pycache__
 passwords.txt
 *.csv
 *.xls*
+.env
